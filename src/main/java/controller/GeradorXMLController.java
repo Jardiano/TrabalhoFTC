@@ -65,7 +65,6 @@ public class GeradorXMLController
         xml = xml.replace("<final>true</final>","<final />");
         xml = xml.replace("<initial>true</initial>","<initial />");
 
-
         header.append(xml);
 
         System.out.println(header);
