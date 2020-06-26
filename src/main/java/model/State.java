@@ -27,12 +27,6 @@ public class State
     private  boolean initialState;
     @XStreamAlias("final")
     private boolean finalState;
-    @XStreamOmitField
-    private  boolean loop;
-
-    public boolean hasLoop(){
-        return  loop;
-    }
 
     @Override
     public String toString()

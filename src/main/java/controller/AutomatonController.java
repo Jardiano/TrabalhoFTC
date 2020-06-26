@@ -18,86 +18,112 @@ public class AutomatonController
 
 
     public void converteExpressão(){
-        /*if(expressao.contains("(") || expressao.contains(")")){
+        String expressao = "1*001*";
 
-        }*/
+        String[] split = expressao.split("");
 
-        String expressao = "1*01*";
+        String sentenca = "100111";
 
-        String sentenca = "110110";
-        String[] split = sentenca.split("");
+        String[] simbolos = sentenca.split("");
 
-        Automaton automaton = new Automaton();
         List<State> states = new ArrayList<State>();
         List<Transition> transitions = new ArrayList<Transition>();
 
         int countState = 0;
+        int indexStates = 0;
 
-        states.add(new State(String.valueOf(countState),"q"+countState,0.0,0.0,true,false,true));
+        for(int i =0; i< expressao.length(); i++){
+            if(states.isEmpty()){
+                states.add(new State(String.valueOf(countState),"q"+countState,0.0,0.0,true,false));
+                countState++;
+            }else if( !split[i].equals("*")
+                && !(i == expressao.length() - 1)
+            && i+1 <= expressao.length()
+            && !split[i+1].equals("*")){
+                states.add(new State(String.valueOf(countState),"q"+countState,0.0,0.0,false,false));
+                countState++;
+            }
+            else if(i == expressao.length() - 1 ){
+                if(split[i].equals("*")){
+                    states.get(states.size()-1).setFinalState(true);
+                }else{
+                states.add(new State(String.valueOf(countState),"q"+countState,0.0,0.0,false,true));
+                countState++;
+                }
+            }
+
+            if(split[i].equals("*")){
+                transitions.add(new Transition(states.get(countState-1).getName(),states.get(countState-1).getName(), split[i-1]));
+            }else if(states.size() > 1 ){
+                if(!split[i-1].equals("*") || i == expressao.length() - 1 ){
+                    if(i == expressao.length() - 1 && !split[i].equals("*")){
+                        transitions.add(new Transition(states.get(indexStates).getName(),states.get(states.size()-1).getName(), split[i]));
+                        indexStates++;
+                    }
+                    else if(!split[i].equals("*")){
+                        transitions.add(new Transition(states.get(indexStates).getName(),states.get(states.size()-1).getName(), split[i-1]));
+                        indexStates++;
+                    }
+                }
+
+            }
+        }
+
+
+        /*states.add(new State(String.valueOf(countState),"q"+countState,0.0,0.0,true,false));
         countState++;
-        states.add(new State(String.valueOf(countState),"q"+countState,0.0,0.0,false,true,true));
+        states.add(new State(String.valueOf(countState),"q"+countState,0.0,0.0,false,true));
         countState++;
 
         transitions.add(new Transition(states.get(0).getName(),states.get(0).getName(), "1"));
         transitions.add(new Transition(states.get(0).getName(),states.get(1).getName(), "0"));
-        transitions.add(new Transition(states.get(1).getName(),states.get(1).getName(), "1"));
+        transitions.add(new Transition(states.get(1).getName(),states.get(1).getName(), "1"));*/
 
-        //int indiceTransicoes = 0;
+        Automaton automaton = new Automaton();
+        automaton.setStates(states);
+        automaton.setTransitions(transitions);
+
+        executaMaquinaEstados(sentenca, simbolos, automaton);
+
+    }
+
+
+    private void executaMaquinaEstados(String sentenca, String[] simbolos, Automaton automaton)
+    {
         int indiceEstados = 0;
-
+        boolean isSimbolAccepted = false;
         State lastState = new State();
         for(int i=0; i<sentenca.length(); i++){
-
-            //Transition currentTransition = transitions.get(indiceTransicoes);
-            State currentState = states.get(indiceEstados);
-            System.out.println("Estado atual " + currentState.getName() + " Valor de entrada "+ split[i]);
-/*            if(split[i].equals(currentTransition.getRead())
-            && currentState.hasLoop())
-            {*/
-                for(Transition transition: transitions){
+            isSimbolAccepted = false;
+            State currentState = automaton.getStates().get(indiceEstados);
+            System.out.println("Estado atual " + currentState.getName() + " Valor de entrada "+ simbolos[i]);
+                for(Transition transition: automaton.getTransitions()){
                     if(transition.getFrom().equals(currentState.getName())
                         && transition.getTo().equals(currentState.getName())
-                        && split[i].equals(transition.getRead())){
+                        && simbolos[i].equals(transition.getRead())){
+                        isSimbolAccepted = true;
                         indiceEstados = Integer.parseInt(transition.getTo().replace("q", ""));
-                        currentState = states.get(indiceEstados);
+                        currentState = automaton.getStates().get(indiceEstados);
                         System.out.println("Transição de " + transition.getFrom() + " para " + transition.getTo());
+                        break;
                     }
                     else if(transition.getFrom().equals(currentState.getName())
-                        && split[i].equals(transition.getRead())){
+                        && simbolos[i].equals(transition.getRead())){
+                        isSimbolAccepted = true;
                         indiceEstados = Integer.parseInt(transition.getTo().replace("q", ""));
-                        currentState = states.get(indiceEstados);
+                        currentState = automaton.getStates().get(indiceEstados);
                         System.out.println("Transição de " + transition.getFrom() + " para " + transition.getTo());
+                        break;
                     }
-
                 }
-            //}
             lastState = currentState;
         }
 
-        if(lastState.isFinalState()){
-            System.out.println("Sentença Aceita");
-        }else{
+        if(!lastState.isFinalState() || ! isSimbolAccepted){
             System.out.println("Sentença Rejeitada");
+        }else{
+            System.out.println("Sentença Aceita");
         }
-
-        /*for(Character s: expressao.toCharArray()){
-
-               new Transition("q0","q0","1");
-                if(s.equals('*')){
-
-                }
-
-                if(s.equals('+')){
-
-
-                }
-
-                if(s.equals('U')){
-
-                }
-
-
-            }*/
     }
 
 

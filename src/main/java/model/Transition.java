@@ -18,4 +18,15 @@ public class Transition
     private String from;
     private String to;
     private String read;
+
+
+    @Override
+    public String toString()
+    {
+        return "Transition{" +
+            "from='" + from + '\'' +
+            ", to='" + to + '\'' +
+            ", read='" + read + '\'' +
+            '}';
+    }
 }
