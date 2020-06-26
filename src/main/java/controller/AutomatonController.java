@@ -18,11 +18,11 @@ public class AutomatonController
 
 
     public void converteExpressão(){
-        String expressao = "1*001*";
+        String expressao = "1*01*";
 
         String[] split = expressao.split("");
 
-        String sentenca = "100111";
+        String sentenca = "0";
 
         String[] simbolos = sentenca.split("");
 
@@ -61,23 +61,17 @@ public class AutomatonController
                         indexStates++;
                     }
                     else if(!split[i].equals("*")){
-                        transitions.add(new Transition(states.get(indexStates).getName(),states.get(states.size()-1).getName(), split[i-1]));
-                        indexStates++;
+                        if(split[i].equals(split[i-1])){
+                            transitions.add(new Transition(states.get(indexStates).getName(),states.get(states.size()-2).getName(), split[i-1]));
+                            indexStates++;
+                        }else{
+                            transitions.add(new Transition(states.get(indexStates).getName(),states.get(states.size()-1).getName(), split[i-1]));
+                            indexStates++;
+                        }
                     }
                 }
-
             }
         }
-
-
-        /*states.add(new State(String.valueOf(countState),"q"+countState,0.0,0.0,true,false));
-        countState++;
-        states.add(new State(String.valueOf(countState),"q"+countState,0.0,0.0,false,true));
-        countState++;
-
-        transitions.add(new Transition(states.get(0).getName(),states.get(0).getName(), "1"));
-        transitions.add(new Transition(states.get(0).getName(),states.get(1).getName(), "0"));
-        transitions.add(new Transition(states.get(1).getName(),states.get(1).getName(), "1"));*/
 
         Automaton automaton = new Automaton();
         automaton.setStates(states);

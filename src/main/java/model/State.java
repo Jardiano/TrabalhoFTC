@@ -28,12 +28,15 @@ public class State
     @XStreamAlias("final")
     private boolean finalState;
 
+
     @Override
     public String toString()
     {
         return "State{" +
             "id='" + id + '\'' +
             ", name='" + name + '\'' +
+            ", initialState=" + initialState +
+            ", finalState=" + finalState +
             '}';
     }
 }
