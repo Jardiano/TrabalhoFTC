@@ -45,7 +45,7 @@ public class Automaton
         Map<String, Long> transitionsWithSameValue = new HashMap<>();
 
         collect.forEach((k,v)-> v.forEach((a,b)-> {
-            transitionsWithSameValue.put(k,b);
+            transitionsWithSameValue.put(k.concat("-").concat(a),b);
             //System.out.println("State: "+ k + " Digit: " +  a + " Number of transitions: " + b);
         }));
 
