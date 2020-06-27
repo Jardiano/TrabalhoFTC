@@ -1,7 +1,12 @@
 package controller;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import model.Automaton;
 import model.State;
 import model.Transition;
@@ -31,11 +36,11 @@ public class AutomatonController
         UniaoService uniaoService = new UniaoService();
         FechoService fechoService = new FechoService();
         //String expressao = "1(0+1)";
-        String expressao = "1*01*";
+        String expressao = "101*01*";
 
         String[] split = expressao.split("");
 
-        String sentenca = "10";
+        String sentenca = "10111101";
 
         String[] simbolos = sentenca.split("");
 
@@ -73,7 +78,9 @@ public class AutomatonController
                 else
                 {
                     states.add(new State(String.valueOf(countState), "q" + countState, 0.0, 0.0, false, true));
+                    transitions.add(new Transition(states.get(countState-1).getName(), states.get(countState).getName(), split[i]));
                     countState++;
+                    indexStates++;
                 }
             }
 
@@ -99,6 +106,48 @@ public class AutomatonController
         int indiceEstados = 0;
         boolean isSimbolAccepted = true;
         State lastState = new State();
+        if(automaton.isUndefinedAutomaton())
+        {
+            System.out.println("Automato não determinístico");
+
+            for (int i = 0; i < sentenca.length(); i++)
+            {
+                isSimbolAccepted = false;
+                State currentState = automaton.getStates().get(indiceEstados);
+                System.out.println("Estado atual " + currentState.getName() + " Valor de entrada " + simbolos[i]);
+                List<Transition> transitionsByState = automaton.getTransitionsByState(currentState);
+
+                Set<String> acceptedValues = new HashSet<>();
+                transitionsByState.forEach( v -> acceptedValues.add(v.getRead()));
+
+                for (Transition transition : transitionsByState)
+                {
+                    if (transition.getFrom().equals(currentState.getName())
+                        && transition.getTo().equals(currentState.getName())
+                        && simbolos[i].equals(transition.getRead()))
+                    {
+                        isSimbolAccepted = true;
+                        indiceEstados = Integer.parseInt(transition.getTo().replace("q", ""));
+                        currentState = automaton.getStates().get(indiceEstados);
+                        System.out.println("Transição de " + transition.getFrom() + " para " + transition.getTo());
+                    }else if(!acceptedValues.contains(simbolos[i])){
+                        i = sentenca.length();
+                        break;
+                    }
+                    else if (transition.getFrom().equals(currentState.getName())
+                        && simbolos[i].equals(transition.getRead()))
+                    {
+                        isSimbolAccepted = true;
+                        indiceEstados = Integer.parseInt(transition.getTo().replace("q", ""));
+                        currentState = automaton.getStates().get(indiceEstados);
+                        System.out.println("Transição de " + transition.getFrom() + " para " + transition.getTo());
+                    }
+                }
+                    lastState = currentState;
+            }
+
+        }else{
+
         for (int i = 0; i < sentenca.length(); i++)
         {
             if (isSimbolAccepted)
@@ -106,7 +155,7 @@ public class AutomatonController
                 isSimbolAccepted = false;
                 State currentState = automaton.getStates().get(indiceEstados);
                 System.out.println("Estado atual " + currentState.getName() + " Valor de entrada " + simbolos[i]);
-                for (Transition transition : automaton.getTransitions())
+                for (Transition transition : automaton.getTransitionsByState(currentState))
                 {
                     if (transition.getFrom().equals(currentState.getName())
                         && transition.getTo().equals(currentState.getName())
@@ -128,8 +177,9 @@ public class AutomatonController
                         break;
                     }
                 }
-                lastState = currentState;
+                    lastState = currentState;
             }
+        }
         }
 
         if (!lastState.isFinalState() || !isSimbolAccepted)

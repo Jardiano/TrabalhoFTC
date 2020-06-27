@@ -1,7 +1,11 @@
 package model;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -19,5 +23,33 @@ public class Automaton
     private List<State> states;
     @XStreamAlias("transition")
     private List<Transition> transitions;
+
+
+    public List<Transition> getTransitionsByState(final State state)
+    {
+        return transitions.stream()
+            .filter(t -> t.getFrom().equals(state.getName()))
+            .sorted(Comparator.comparing(Transition::getTo).reversed())
+            .collect(Collectors.toList());
+    }
+
+
+    public boolean isUndefinedAutomaton()
+    {
+        Map<String, Map<String, Long>> collect = transitions.stream()
+            .collect(
+                Collectors.groupingBy(
+                    Transition::getFrom,
+                    Collectors.groupingBy(Transition::getRead, Collectors.counting())));
+
+        Map<String, Long> transitionsWithSameValue = new HashMap<>();
+
+        collect.forEach((k,v)-> v.forEach((a,b)-> {
+            transitionsWithSameValue.put(k,b);
+            //System.out.println("State: "+ k + " Digit: " +  a + " Number of transitions: " + b);
+        }));
+
+        return transitionsWithSameValue.values().stream().anyMatch(v -> v > 1);
+    }
 
 }
