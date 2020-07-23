@@ -112,4 +112,79 @@ public class UniaoService
         return automaton;
     }
 
+
+    /*
+                String primeiraParte = expressao.substring(0, expressao.indexOf("+"));
+            String[] splitPrimeiraParte = primeiraParte.split("");
+            String segundaParte = expressao.substring(expressao.indexOf("+") + 1, expressao.length());
+            String[] splitSegundaParte = segundaParte.split("");
+
+            for (int i = 0; i < splitPrimeiraParte.length; i++)
+            {
+                if (i == splitPrimeiraParte.length - 1 && splitPrimeiraParte.length == 1)
+                {
+                    states.add(new State(String.valueOf(countState), "q" + countState, 0.0, 0.0, false, true));
+                    countState++;
+
+                    transitions.add(new Transition(raiz.getName(), states.get(states.size() - 1).getName(), splitPrimeiraParte[i]));
+                    indexStates++;
+
+                }
+                else if (i == 0)
+                {
+                    states.add(new State(String.valueOf(countState), "q" + countState, 0.0, 0.0, false, false));
+                    countState++;
+
+                    transitions.add(new Transition(raiz.getName(), states.get(states.size() - 1).getName(), splitPrimeiraParte[i]));
+                    indexStates++;
+
+                }
+                else
+                {
+                    if (i == splitPrimeiraParte.length - 1)
+                    {
+                        states.add(new State(String.valueOf(countState), "q" + countState, 0.0, 0.0, false, true));
+                        countState++;
+                    }
+                    else
+                    {
+                        states.add(new State(String.valueOf(countState), "q" + countState, 0.0, 0.0, false, false));
+                        countState++;
+                    }
+
+                    transitions.add(new Transition(states.get(indexStates).getName(), states.get(states.size() - 1).getName(), splitPrimeiraParte[i]));
+                    indexStates++;
+                }
+
+                if (i == splitPrimeiraParte.length - 1)
+                {
+                    if (segundaParte.contains("+"))
+                    {
+                        primeiraParte = segundaParte.substring(0, segundaParte.indexOf("+"));
+                        splitPrimeiraParte = primeiraParte.split("");
+                        segundaParte = segundaParte.substring(segundaParte.indexOf("+") + 1, segundaParte.length());
+                    }
+                    else
+                    {
+                        primeiraParte = segundaParte;
+                        splitPrimeiraParte = primeiraParte.split("");
+                        segundaParte = "";
+                    }
+                    if (primeiraParte.length() > 0)
+                    {
+                        i = 0;
+                    }
+                }
+
+            }
+     */
+
+
+
+
+
+
+
+
+
 }

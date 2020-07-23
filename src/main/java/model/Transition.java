@@ -24,8 +24,8 @@ public class Transition
     public String toString()
     {
         return "Transition{" +
-            "from='" + from + '\'' +
-            ", to='" + to + '\'' +
+            "from='" + "q"+from + '\'' +
+            ", to='" + "q"+to + '\'' +
             ", read='" + read + '\'' +
             '}';
     }

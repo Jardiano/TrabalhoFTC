@@ -2,24 +2,31 @@ package controller;
 
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.DomDriver;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 import model.Automaton;
 import model.State;
 import model.Structure;
 import model.Transition;
+import sun.rmi.runtime.Log;
 
 public class GeradorXMLController
 {
 
-    public void geraXML(String corpoAutomato, String expression){
+    public void geraXML(Automaton automaton, String expression){
         StringBuilder header = new StringBuilder();
         //header.append("<?xml version=\"1.0\"?>\n");
         header.append("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n");
         header.append(" <!--".concat(expression).concat("-->\n"));
         //header.append("<structure xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">");
 
-        Transition transition1 = new Transition();
+        /*Transition transition1 = new Transition();
         transition1.setFrom("3");
         transition1.setTo("1");
         transition1.setRead("b");
@@ -47,7 +54,10 @@ public class GeradorXMLController
 
         Automaton automaton = new Automaton();
         automaton.setStates(states);
-        automaton.setTransitions(transitions);
+        automaton.setTransitions(transitions);*/
+
+
+
         Structure structure = new Structure("fa",automaton);
 
 
@@ -59,6 +69,8 @@ public class GeradorXMLController
 
         String xml = xStream.toXML(structure);
 
+        xml = xml.replace("<read>λ</read>", "<read/>");
+
         xml = xml.replace("<final>false</final>","");
         xml = xml.replace("<initial>false</initial>","");
 
@@ -67,13 +79,29 @@ public class GeradorXMLController
 
         header.append(xml);
 
-        System.out.println(header);
+        geraArquivo(header.toString());
+    }
+
+    private void geraArquivo(String content)  {
+        File file = new File("dfa.dff");
+        FileWriter writer = null;
+        try {
+            if(file.exists()){
+                file.delete();
+            }
+            writer = new FileWriter(file);
+            writer.write(content);
+            writer.close();
+        }
+        catch (IOException e) {
+            Log.getLog(String.valueOf(Level.SEVERE),"Erro ao gerar arquivo", false);
+        }
     }
 
 
     public static void main(String[] args)
     {
         GeradorXMLController controller = new GeradorXMLController();
-        controller.geraXML("","");
+        controller.geraXML(new Automaton(),"");
     }
 }
