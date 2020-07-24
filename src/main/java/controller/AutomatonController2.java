@@ -30,9 +30,11 @@ public class AutomatonController2 {
         //String expressao = "1(0*0)+(11*)+(1)00";
         //String expressao = "1*011*01";
         //String expressao = "1*01+1*01";
+        String expressao = "1*01+1*01+1*(01)";
         //String expressao = "1(01)*+0(01)*";
-        String expressao = "1*10(01)*";
+        //String expressao = "1*10(01)*";
         //String expressao = "1*1001*";
+        //String expressao = "(00+01(11)*10+(1+01(11)*0)(0(11)*0)*(1+0(11)*10))*";
         final String expressaoInaltareda = expressao;
 
         String sentenca = "111111";
@@ -47,7 +49,18 @@ public class AutomatonController2 {
 
         String[] split = expressao.split("");
 
-        geracaoAFN(split);
+        if (expressao.contains("+")) {
+            do {
+                String[] split1 = expressao.substring(0, expressao.indexOf("+")).split("");
+                geracaoAFN(split1);
+                expressao = expressao.replace(expressao.substring(0, expressao.indexOf("+")+1),"");
+            } while (expressao.contains("+"));
+            String[] split2 = expressao.substring(expressao.indexOf("+") + 1, expressao.length()).split("");
+            geracaoAFN(split2);
+        }
+        else {
+            geracaoAFN(split);
+        }
 
         Automaton automaton = new Automaton();
         automaton.setStates(states);
@@ -108,17 +121,28 @@ public class AutomatonController2 {
             countState++;
         }
 
+        if (!split[split.length - 1].equals("*")) {
+            transitions.add(new Transition(states.get(countState - 1).getId(), "1", LAMBDA));
+        }
+
         List<Transition> localTransitions = new ArrayList<>(transitions);
 
         String readTransition = "";
         String idTransitionFrom = "";
         String idTransitionTo = "";
 
-        for (Transition transition : localTransitions){
-            //localTransitions.forEach(transition -> {
+        for (Transition transition : localTransitions) {
+            String value = transition.getRead();
 
-            if (transition.getRead().contains("*")) {
-                String value = transition.getRead().replace("*", "");
+            if (value.contains("(")) {
+                readTransition = value.replaceFirst("[(]", "");
+                readTransition = readTransition.substring(0, readTransition.lastIndexOf(")"));
+                idTransitionFrom = transition.getFrom();
+                idTransitionTo = transition.getTo();
+            }
+
+            if (value.contains("*")) {
+                value = value.replace("*", "");
 
                 transition.setRead(LAMBDA);
                 transitions.add(new Transition(transition.getTo(), transition.getFrom(), LAMBDA));
@@ -136,49 +160,47 @@ public class AutomatonController2 {
                 if (value.contains("(")) {
                     readTransition = value.replaceFirst("[(]", "");
                     readTransition = readTransition.substring(0, readTransition.lastIndexOf(")"));
-                    idTransitionFrom = states.get(countState-2).getId();//transition.getFrom();
-                    idTransitionTo = states.get(countState-1).getId();
+                    idTransitionFrom = states.get(countState - 2).getId();//transition.getFrom();
+                    idTransitionTo = states.get(countState - 1).getId();
                 }
+
             }
 
-        if (!readTransition.isEmpty()) {
-            String[] split1 = readTransition.split("");
-            //transitions.removeIf(transition1 -> transition1.getRead().equals())
-            for (int i = 0; i < split1.length; i++) {
-                if (i == 0) {
-                    states.add(new State(String.valueOf(countState), "q" + countState, 0.0, 0.0, false, false));
-                    transitions.add(new Transition(idTransitionFrom, states.get(countState).getId(), LAMBDA));
-                    countState++;
+            if (!readTransition.isEmpty()) {
+                String[] split1 = readTransition.split("");
+                for (int i = 0; i < split1.length; i++) {
+                    if (i == 0) {
+                        states.add(new State(String.valueOf(countState), "q" + countState, 0.0, 0.0, false, false));
+                        transitions.add(new Transition(idTransitionFrom, states.get(countState).getId(), LAMBDA));
+                        countState++;
 
-                    states.add(new State(String.valueOf(countState), "q" + countState, 0.0, 0.0, false, false));
-                    transitions.add(new Transition(states.get(countState - 1).getId(), states.get(countState).getId(), split1[i]));
-                    countState++;
+                        states.add(new State(String.valueOf(countState), "q" + countState, 0.0, 0.0, false, false));
+                        transitions.add(new Transition(states.get(countState - 1).getId(), states.get(countState).getId(), split1[i]));
+                        countState++;
 
+                    }
+                    else {
+                        states.add(new State(String.valueOf(countState), "q" + countState, 0.0, 0.0, false, false));
+                        transitions.add(new Transition(states.get(countState - 1).getId(), states.get(countState).getId(), LAMBDA));
+                        countState++;
+
+                        states.add(new State(String.valueOf(countState), "q" + countState, 0.0, 0.0, false, false));
+                        transitions.add(new Transition(states.get(countState - 1).getId(), states.get(countState).getId(), split1[i]));
+                        countState++;
+                    }
+
+                    if (i == split1.length - 1) {
+                        transitions.add(new Transition(states.get(countState - 1).getId(), idTransitionTo, LAMBDA));
+                        countState++;
+                    }
                 }
-                else {
-                    states.add(new State(String.valueOf(countState), "q" + countState, 0.0, 0.0, false, false));
-                    transitions.add(new Transition(states.get(countState - 1).getId(), states.get(countState).getId(), LAMBDA));
-                    countState++;
+                readTransition = "";
+                final String currentTransitionFrom = idTransitionFrom;
+                final String currentTransitionTo = idTransitionTo;
 
-                    states.add(new State(String.valueOf(countState), "q" + countState, 0.0, 0.0, false, false));
-                    transitions.add(new Transition(states.get(countState - 1).getId(), states.get(countState).getId(), split1[i]));
-                    countState++;
-                }
-
-                if (i == split1.length-1) {
-                    //states.add(new State(String.valueOf(countState), "q" + countState, 0.0, 0.0, false, false));
-                    transitions.add(new Transition(states.get(countState-1).getId(), idTransitionTo, LAMBDA));
-                    countState++;
-                }
+                transitions.removeIf(transition1 -> transition1.getFrom().equals(currentTransitionFrom) && transition1.getTo().equals(currentTransitionTo));
             }
-            readTransition = "";
-            final String currentTransitionFrom = idTransitionFrom;
-            final String currentTransitionTo = idTransitionTo;
-
-            transitions.removeIf(transition1 -> transition1.getFrom().equals(currentTransitionFrom) && transition1.getTo().equals(currentTransitionTo));
         }
-    }
-        //});
     }
 
 

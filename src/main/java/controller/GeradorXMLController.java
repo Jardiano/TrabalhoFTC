@@ -26,38 +26,6 @@ public class GeradorXMLController
         header.append(" <!--".concat(expression).concat("-->\n"));
         //header.append("<structure xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">");
 
-        /*Transition transition1 = new Transition();
-        transition1.setFrom("3");
-        transition1.setTo("1");
-        transition1.setRead("b");
-
-        List<Transition> transitions = new ArrayList<Transition>();
-        transitions.add(transition1);
-
-        State state1 = new State();
-        state1.setId("0");
-        state1.setName("q0");
-        state1.setX(0.0);
-        state1.setY(0.0);
-        state1.setInitialState(true);
-
-        State state2 = new State();
-        state2.setId("1");
-        state2.setName("q1");
-        state2.setX(0.0);
-        state2.setY(0.0);
-        state2.setFinalState(true);
-
-        List<State> states = new ArrayList<State>();
-        states.add(state1);
-        states.add(state2);
-
-        Automaton automaton = new Automaton();
-        automaton.setStates(states);
-        automaton.setTransitions(transitions);*/
-
-
-
         Structure structure = new Structure("fa",automaton);
 
 
