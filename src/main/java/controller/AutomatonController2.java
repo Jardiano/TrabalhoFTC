@@ -16,21 +16,12 @@ public class AutomatonController2 {
     public static List<Transition> transitions = new ArrayList<Transition>();
 
     public static int countState = 0;
-    public static int indexStates = 0;
-    public static int levelParenteses = 0;
-    public static State raiz;
     public static final String LAMBDA = "λ";
     public static final List<Character> caracteresEspeciais = Arrays.asList('(', ')', '*', '+');
     public static final Set<String> alfabeto = new HashSet<>();
 
 
     public static void main(String[] args) {
-        AutomatonController2 controller = new AutomatonController2();
-        controller.converteExpressão();
-    }
-
-
-    public void converteExpressão() {
         //String expressao = "1(0*0)+(11*)+(1)00";
         //String expressao = "1*011*01";
         //String expressao = "1*01+1*01";
@@ -39,9 +30,17 @@ public class AutomatonController2 {
         //String expressao = "1*10(01)*";
         //String expressao = "1*1001*";
         //String expressao = "(00+01(11)*10+(1+01(11)*0)(0(11)*0)*(1+0(11)*10))*";
-        final String expressaoInaltareda = expressao;
 
         String sentenca = "111111";
+
+        AutomatonController2 controller = new AutomatonController2();
+        controller.converteExpressão(expressao, sentenca);
+    }
+
+
+    public void converteExpressão(String expressao, String sentenca) {
+        final String expressaoInaltareda = expressao;
+
         defineAlfabeto(expressao);
 
         String[] simbolos = sentenca.split("");
@@ -72,20 +71,8 @@ public class AutomatonController2 {
         automatonAfn.setTransitions(transitions);
 
         List<State> statesAfd = new ArrayList<State>();
-        //statesAfd = states;
 
         List<Transition> transitionsAfd = new ArrayList<Transition>();
-        //transitionsAfd = transitions;
-
-        /*int countStateAfd = 0;
-
-        statesAfd.add(new State(String.valueOf(countStateAfd), "q" + countStateAfd, 0.0, 0.0, true, false));
-        countStateAfd++;*/
-
-
-        /*State state = statesAfd.get(0);
-
-        convertAFD(state, transitionsAfd, automatonAfn, statesAfd, countStateAfd,null);*/
 
         boolean hasLamda = true;
         int i = 0;
@@ -183,28 +170,6 @@ public class AutomatonController2 {
             state.setFinalState(true);
         }
         return stateById;
-    }
-
-
-    private void convertAFD(State state, List<Transition> transitionsAfd, Automaton automatonAfn, List<State> statesAfd, int countStateAfd, State lastState) {
-        List<Transition> localTransitions = automatonAfn.getTransitionsByStateId(state.getId());
-        State currentState = state;
-        for (Transition transition : localTransitions) {
-
-            if (currentState.getId().equals(transition.getFrom()) && transition.getRead().equals(LAMBDA)) {
-                State localState = automatonAfn.getStateById(transition.getTo());
-
-                if (lastState != null && currentState.getId().equals(transition.getFrom()) && lastState.getId().equals(transition.getTo()) && lastState == localState) {
-                    continue;
-                }
-                convertAFD(localState, transitionsAfd, automatonAfn, statesAfd, countStateAfd, state);
-            }
-            else if (currentState.getId().equals(transition.getFrom()) && !transition.getRead().equals(LAMBDA)) {
-                statesAfd.add(new State(String.valueOf(countStateAfd), "q" + countStateAfd, 0.0, 0.0, false, false));
-                transitionsAfd.add(new Transition(statesAfd.get(countStateAfd - 1).getId(), statesAfd.get(countStateAfd).getId(), transition.getRead()));
-                countStateAfd++;
-            }
-        }
     }
 
 
