@@ -1,9 +1,11 @@
 package controller;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 import model.Automaton;
 import model.State;
 import model.Transition;
@@ -18,6 +20,8 @@ public class AutomatonController2 {
     public static int levelParenteses = 0;
     public static State raiz;
     public static final String LAMBDA = "λ";
+    public static final List<Character> caracteresEspeciais = Arrays.asList('(', ')', '*', '+');
+    public static final Set<String> alfabeto = new HashSet<>();
 
 
     public static void main(String[] args) {
@@ -38,6 +42,7 @@ public class AutomatonController2 {
         final String expressaoInaltareda = expressao;
 
         String sentenca = "111111";
+        defineAlfabeto(expressao);
 
         String[] simbolos = sentenca.split("");
 
@@ -53,7 +58,7 @@ public class AutomatonController2 {
             do {
                 String[] split1 = expressao.substring(0, expressao.indexOf("+")).split("");
                 geracaoAFN(split1);
-                expressao = expressao.replace(expressao.substring(0, expressao.indexOf("+")+1),"");
+                expressao = expressao.replace(expressao.substring(0, expressao.indexOf("+") + 1), "");
             } while (expressao.contains("+"));
             String[] split2 = expressao.substring(expressao.indexOf("+") + 1, expressao.length()).split("");
             geracaoAFN(split2);
@@ -62,12 +67,150 @@ public class AutomatonController2 {
             geracaoAFN(split);
         }
 
-        Automaton automaton = new Automaton();
-        automaton.setStates(states);
-        automaton.setTransitions(transitions);
+        Automaton automatonAfn = new Automaton();
+        automatonAfn.setStates(states);
+        automatonAfn.setTransitions(transitions);
 
-        executaMaquinaEstados(sentenca, simbolos, automaton, expressaoInaltareda);
+        List<State> statesAfd = new ArrayList<State>();
+        //statesAfd = states;
 
+        List<Transition> transitionsAfd = new ArrayList<Transition>();
+        //transitionsAfd = transitions;
+
+        /*int countStateAfd = 0;
+
+        statesAfd.add(new State(String.valueOf(countStateAfd), "q" + countStateAfd, 0.0, 0.0, true, false));
+        countStateAfd++;*/
+
+
+        /*State state = statesAfd.get(0);
+
+        convertAFD(state, transitionsAfd, automatonAfn, statesAfd, countStateAfd,null);*/
+
+        boolean hasLamda = true;
+        int i = 0;
+        List<String> removedState = new ArrayList<>();
+        while (hasLamda) {
+            State state = states.get(i);
+            List<Transition> transitionsByStateId = automatonAfn.getTransitionsByStateId(states.get(i).getId());
+
+            for (Transition t : transitionsByStateId) {
+                if (t.getTo().equals(t.getFrom()) && !removedState.contains(state.getId())) {
+                    String read = transitionsByStateId.stream().filter(ts -> !ts.getRead().equals(LAMBDA)).findFirst().get().getRead();
+                    if (t.getRead().equals(LAMBDA)) {
+                        t.setRead(read);
+                    }
+                }
+                else if (t.getRead().equals(LAMBDA) && !removedState.contains(state.getId())) {
+                    boolean removed = transitions.removeIf(transition1 -> transition1.getRead().equals(t.getRead()) && transition1.getTo()
+                        .equals(t.getTo()) && transition1.getFrom().equals(t.getFrom()));
+
+                    if (Integer.parseInt(t.getFrom()) < Integer.parseInt(t.getTo()) || t.getTo().equals("1")) {
+                        if (removed) {
+                            removedState.add(t.getTo());
+                        }
+                        updateAndRemoveState(automatonAfn, state, t);
+                        i--;
+                    }
+                    else if (!t.getTo().equals("1")) {
+                        State state1 = automatonAfn.getStateById(t.getTo());
+                        List<Transition> transitionsByStateId1 = automatonAfn.getTransitionsByStateId(state1.getId());
+                        System.out.println(transitionsByStateId1);
+
+                        transitionsByStateId1.forEach(transition -> {
+                            if (transition.getFrom().equals(transition.getTo())) {
+                                transition.setFrom(t.getFrom());
+                                transition.setTo(t.getFrom());
+                            }
+                            else if (!transition.getTo().equals(t.getFrom()) && !transition.getRead().equals(LAMBDA)) {
+                                transitions.add(new Transition(t.getFrom(), transition.getTo(), transition.getRead()));
+                            }
+                        });
+                    }
+                }
+            }
+
+            if (i == states.size() - 1) {
+                hasLamda = false;
+            }
+            else if (i < 0) {
+                i = 0;
+            }
+
+            if (transitionsByStateId.stream().noneMatch(transition -> transition.getRead().equals(LAMBDA))) {
+                i++;
+            }
+            statesAfd = states;
+            transitionsAfd = transitions;
+        }
+
+        Automaton automatonAfd = new Automaton();
+        automatonAfd.setStates(statesAfd);
+        automatonAfd.setTransitions(transitionsAfd);
+
+        executaMaquinaEstados(sentenca, simbolos, automatonAfd, expressaoInaltareda);
+        //executaMaquinaEstados(sentenca, simbolos, automatonAfn, expressaoInaltareda);
+
+    }
+
+
+    private void updateAndRemoveState(Automaton automatonAfn, State state, Transition transition) {
+        List<Transition> listTransations = automatonAfn.getAllTransitionsWithRelatedStateById(transition.getTo());
+        for (Transition t : listTransations) {
+            if (t.getFrom().equals(transition.getTo())) {
+                updateState(automatonAfn, state, t.getFrom());
+                t.setFrom(state.getId());
+            }
+            else if (t.getTo().equals(transition.getTo())) {
+                updateState(automatonAfn, state, t.getTo());
+                t.setTo(state.getId());
+            }
+        }
+
+        if (transition.getTo().equals("1")) {
+            updateState(automatonAfn, state, transition.getTo());
+        }
+        states.removeIf(state1 -> state1.getId().equals(transition.getTo()));
+    }
+
+
+    private State updateState(Automaton automatonAfn, State state, String to) {
+        State stateById = automatonAfn.getStateById(to);
+        if (stateById.isInitialState()) {
+            state.setInitialState(true);
+        }
+        if (stateById.isFinalState()) {
+            state.setFinalState(true);
+        }
+        return stateById;
+    }
+
+
+    private void convertAFD(State state, List<Transition> transitionsAfd, Automaton automatonAfn, List<State> statesAfd, int countStateAfd, State lastState) {
+        List<Transition> localTransitions = automatonAfn.getTransitionsByStateId(state.getId());
+        State currentState = state;
+        for (Transition transition : localTransitions) {
+
+            if (currentState.getId().equals(transition.getFrom()) && transition.getRead().equals(LAMBDA)) {
+                State localState = automatonAfn.getStateById(transition.getTo());
+
+                if (lastState != null && currentState.getId().equals(transition.getFrom()) && lastState.getId().equals(transition.getTo()) && lastState == localState) {
+                    continue;
+                }
+                convertAFD(localState, transitionsAfd, automatonAfn, statesAfd, countStateAfd, state);
+            }
+            else if (currentState.getId().equals(transition.getFrom()) && !transition.getRead().equals(LAMBDA)) {
+                statesAfd.add(new State(String.valueOf(countStateAfd), "q" + countStateAfd, 0.0, 0.0, false, false));
+                transitionsAfd.add(new Transition(statesAfd.get(countStateAfd - 1).getId(), statesAfd.get(countStateAfd).getId(), transition.getRead()));
+                countStateAfd++;
+            }
+        }
+    }
+
+
+    private void defineAlfabeto(String expressao) {
+        Stream<Character> caractereStream = expressao.chars().mapToObj(c -> (char) c).filter(c -> !caracteresEspeciais.contains(c));
+        caractereStream.forEach(c -> alfabeto.add(String.valueOf(c)));
     }
 
 
@@ -160,7 +303,7 @@ public class AutomatonController2 {
                 if (value.contains("(")) {
                     readTransition = value.replaceFirst("[(]", "");
                     readTransition = readTransition.substring(0, readTransition.lastIndexOf(")"));
-                    idTransitionFrom = states.get(countState - 2).getId();//transition.getFrom();
+                    idTransitionFrom = states.get(countState - 2).getId();
                     idTransitionTo = states.get(countState - 1).getId();
                 }
 

@@ -52,4 +52,19 @@ public class Automaton
         return transitionsWithSameValue.values().stream().anyMatch(v -> v > 1);
     }
 
+    public State getStateById(String id){
+        return states.stream().filter(state -> state.getId().equals(id)).findFirst().get();
+    }
+
+    public List<Transition> getTransitionsByStateId(String stateid){
+        return transitions.stream().filter(transition -> transition.getFrom().equals(stateid))
+            .sorted(Comparator.comparing(Transition::getTo))
+            .collect(Collectors.toList());
+    }
+
+    public List<Transition> getAllTransitionsWithRelatedStateById(String stateid){
+        return transitions.stream().filter(transition -> transition.getFrom().equals(stateid) || transition.getTo().equals(stateid))
+            .collect(Collectors.toList());
+    }
+
 }
