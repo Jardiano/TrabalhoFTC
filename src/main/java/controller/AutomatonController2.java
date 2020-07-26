@@ -2,18 +2,20 @@ package controller;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import model.Automaton;
 import model.State;
 import model.Transition;
 
 public class AutomatonController2 {
-    public static List<State> states = new ArrayList<State>();
+    public static List<State> states = new ArrayList<>();
 
-    public static List<Transition> transitions = new ArrayList<Transition>();
+    public static List<Transition> transitions = new ArrayList<>();
 
     public static int countState = 0;
     public static final String LAMBDA = "λ";
@@ -23,27 +25,30 @@ public class AutomatonController2 {
 
     public static void main(String[] args) {
         //String expressao = "1(0*0)+(11*)+(1)00";
-        //String expressao = "1*011*01";
+        String expressao = "1*011*01";
+        //String expressao = "1(01)*+0(01)*";
         //String expressao = "1*01+1*01";
-        String expressao = "1*01+1*01+1*(01)";
+                                    //String expressao = "1*01+1*01+1*(01)";
         //String expressao = "1(01)*+0(01)*";
         //String expressao = "1*10(01)*";
         //String expressao = "1*1001*";
         //String expressao = "(00+01(11)*10+(1+01(11)*0)(0(11)*0)*(1+0(11)*10))*";
 
-        String sentenca = "111111";
+        String sentenca = "1111011111101";
 
         AutomatonController2 controller = new AutomatonController2();
-        controller.converteExpressão(expressao, sentenca);
+        Automaton automaton = controller.converteExpressão(expressao);
+        boolean result = controller.executaMaquinaEstados(sentenca, sentenca.split(""), automaton);
+        System.out.println("The result is "+ result);
     }
 
 
-    public void converteExpressão(String expressao, String sentenca) {
-        final String expressaoInaltareda = expressao;
+    public Automaton converteExpressão(String expressao) {
+        //final String expressaoInaltareda = new String(expressao);
 
         defineAlfabeto(expressao);
 
-        String[] simbolos = sentenca.split("");
+       //String[] simbolos = sentenca.split("");
 
         states.add(new State(String.valueOf(countState), "q" + countState, 0.0, 0.0, true, false));
         countState++;
@@ -70,6 +75,18 @@ public class AutomatonController2 {
         automatonAfn.setStates(states);
         automatonAfn.setTransitions(transitions);
 
+        Automaton automatonAfd = convertToAfd(automatonAfn);
+
+        //executaMaquinaEstados(sentenca, simbolos, automatonAfd, expressaoInaltareda);
+        //executaMaquinaEstados(sentenca, simbolos, automatonAfn, expressaoInaltareda);
+
+        /*GeradorXMLController geradorXml = new GeradorXMLController();
+        geradorXml.geraXML(automatonAfd, expressao);*/
+
+        return automatonAfd;
+    }
+
+    private Automaton convertToAfd(Automaton automatonAfn) {
         List<State> statesAfd = new ArrayList<State>();
 
         List<Transition> transitionsAfd = new ArrayList<Transition>();
@@ -102,7 +119,6 @@ public class AutomatonController2 {
                     else if (!t.getTo().equals("1")) {
                         State state1 = automatonAfn.getStateById(t.getTo());
                         List<Transition> transitionsByStateId1 = automatonAfn.getTransitionsByStateId(state1.getId());
-                        System.out.println(transitionsByStateId1);
 
                         transitionsByStateId1.forEach(transition -> {
                             if (transition.getFrom().equals(transition.getTo())) {
@@ -131,13 +147,28 @@ public class AutomatonController2 {
             transitionsAfd = transitions;
         }
 
+        removeNoDeterministTransitions(statesAfd, transitionsAfd);
+
         Automaton automatonAfd = new Automaton();
         automatonAfd.setStates(statesAfd);
         automatonAfd.setTransitions(transitionsAfd);
+        return automatonAfd;
+    }
 
-        executaMaquinaEstados(sentenca, simbolos, automatonAfd, expressaoInaltareda);
-        //executaMaquinaEstados(sentenca, simbolos, automatonAfn, expressaoInaltareda);
 
+    private void removeNoDeterministTransitions(List<State> statesAfd, List<Transition> transitionsAfd) {
+        final List<Transition> trst = transitionsAfd;
+        statesAfd.forEach( state -> {
+            List<Transition> collect = trst.stream().filter(transition -> transition.getFrom().equals(state.getId())).collect(Collectors.toList());
+            alfabeto.forEach(caracter ->  {
+                long count = collect.stream().filter(t -> t.getRead().equals(caracter)).sorted(Comparator.comparing(Transition::getTo).reversed()).count();
+                if(count > 1){
+                    Transition trt = collect.stream().filter(t -> t.getRead().equals(caracter)).sorted(Comparator.comparing(Transition::getTo)).findFirst().get();
+                    transitions.removeIf(transition -> transition.getFrom().equals(trt.getFrom()) && transition.getTo().equals(trt.getTo()) && trt.getRead().equals(trt.getRead()));
+
+                }
+            });
+        });
     }
 
 
@@ -312,12 +343,11 @@ public class AutomatonController2 {
     }
 
 
-    private void executaMaquinaEstados(String sentenca, String[] simbolos, Automaton automaton, String expressao) {
+    public boolean executaMaquinaEstados(String sentenca, String[] simbolos, Automaton automaton) {
         int indiceEstados = 0;
         boolean isSimbolAccepted = true;
         State lastState = new State();
-        if (automaton.isUndefinedAutomaton()) {
-            System.out.println("Automato não determinístico");
+        /*if (automaton.isUndefinedAutomaton()) {
 
             for (int i = 0; i < sentenca.length(); i++) {
                 isSimbolAccepted = false;
@@ -350,25 +380,26 @@ public class AutomatonController2 {
             }
 
         }
-        else {
+        else {*/
 
+        State currentState = null;
             for (int i = 0; i < sentenca.length(); i++) {
                 if (isSimbolAccepted) {
                     isSimbolAccepted = false;
-                    State currentState = automaton.getStates().get(indiceEstados);
+                    if(i == 0){
+                        currentState = automaton.getStates().get(i);
+                    }
                     System.out.println("Estado atual " + currentState.getId() + " Valor de entrada " + simbolos[i]);
-                    for (Transition transition : automaton.getTransitionsByState(currentState)) {
+                    for (Transition transition : automaton.getTransitionsByStateId(currentState.getId())) {
                         if (transition.getFrom().equals(currentState.getId()) && transition.getTo().equals(currentState.getId()) && simbolos[i].equals(transition.getRead())) {
                             isSimbolAccepted = true;
-                            indiceEstados = Integer.parseInt(transition.getTo().replace("q", ""));
-                            currentState = automaton.getStates().get(indiceEstados);
+                            currentState = automaton.getStateById(transition.getTo());
                             System.out.println("Transição de " + transition.getFrom() + " para " + transition.getTo());
                             break;
                         }
                         else if (transition.getFrom().equals(currentState.getId()) && simbolos[i].equals(transition.getRead())) {
                             isSimbolAccepted = true;
-                            indiceEstados = Integer.parseInt(transition.getTo().replace("q", ""));
-                            currentState = automaton.getStates().get(indiceEstados);
+                            currentState = automaton.getStateById(transition.getTo());
                             System.out.println("Transição de " + transition.getFrom() + " para " + transition.getTo());
                             break;
                         }
@@ -376,17 +407,17 @@ public class AutomatonController2 {
                     lastState = currentState;
                 }
             }
-        }
+        //}
 
-        if (!lastState.isFinalState() || !isSimbolAccepted) {
-            System.out.println("Sentença Rejeitada");
+        if (lastState.isFinalState()) {
+            System.out.println("Sentença Aceita");
+            return true;
         }
         else {
-            System.out.println("Sentença Aceita");
+            System.out.println("Sentença Rejeitada");
+            return false;
         }
 
-        GeradorXMLController geradorXml = new GeradorXMLController();
-        geradorXml.geraXML(automaton, expressao);
     }
 
 
