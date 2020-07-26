@@ -46,7 +46,7 @@ public class Automaton
 
         collect.forEach((k,v)-> v.forEach((a,b)-> {
             transitionsWithSameValue.put(k.concat("-").concat(a),b);
-            //System.out.println("State: "+ k + " Digit: " +  a + " Number of transitions: " + b);
+            System.out.println("State: "+ k + " Digit: " +  a + " Number of transitions: " + b);
         }));
 
         return transitionsWithSameValue.values().stream().anyMatch(v -> v > 1);
@@ -56,7 +56,13 @@ public class Automaton
         return states.stream().filter(state -> state.getId().equals(id)).findFirst().get();
     }
 
-    public List<Transition> getTransitionsByStateId(String stateid){
+    public List<Transition> getTransitionsFromStateId(String stateid){
+        return transitions.stream().filter(transition -> transition.getFrom().equals(stateid))
+            .sorted(Comparator.comparing(Transition::getTo))
+            .collect(Collectors.toList());
+    }
+
+    public List<Transition> getTransitionsToStateId(String stateid){
         return transitions.stream().filter(transition -> transition.getFrom().equals(stateid))
             .sorted(Comparator.comparing(Transition::getTo))
             .collect(Collectors.toList());

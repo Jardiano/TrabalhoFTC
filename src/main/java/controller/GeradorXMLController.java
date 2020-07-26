@@ -19,7 +19,7 @@ import sun.rmi.runtime.Log;
 public class GeradorXMLController
 {
 
-    public void geraXML(Automaton automaton, String expression){
+    public void geraXML(Automaton automaton, String expression, String path){
         StringBuilder header = new StringBuilder();
         //header.append("<?xml version=\"1.0\"?>\n");
         header.append("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n");
@@ -47,11 +47,18 @@ public class GeradorXMLController
 
         header.append(xml);
 
-        geraArquivo(header.toString());
+        geraArquivo(header.toString(), path);
     }
 
-    private void geraArquivo(String content)  {
-        File file = new File("dfa.dff");
+    private void geraArquivo(String content,String path)  {
+        File file;
+        if(path == null){
+            file = new File("dfa.jff");
+        }else{
+            file = new File(path.concat(System.getProperty("file.separator")).concat("dfa.jff"));
+        }
+
+
         FileWriter writer = null;
         try {
             if(file.exists()){
@@ -70,6 +77,6 @@ public class GeradorXMLController
     public static void main(String[] args)
     {
         GeradorXMLController controller = new GeradorXMLController();
-        controller.geraXML(new Automaton(),"");
+        controller.geraXML(new Automaton(),"", null);
     }
 }

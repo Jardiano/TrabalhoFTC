@@ -19,20 +19,26 @@ public class AutomatonController {
     public static State raiz;
 
 
-
+    public static void main(String[] args) {
+        AutomatonController controller = new AutomatonController();
+        controller.converteExpressão();
+    }
 
     public void converteExpressão() {
         //String expressao = "1(0*0)+(11*)+(1)00";
         //String expressao = "1*011*01";
         //String expressao = "1*01+1*01";
         //String expressao = "1(01)*+0(01)*";
-        String expressao = "0(010)*";
+        //String expressao = "1*011*01";
+        String expressao = "110*";
+        //String expressao = "(00+01(11)*10+(1+01(11)*0)(0(11)*0)*(1+0(11)*10))*";
+
+        String sentenca = "110000";
+
         final String expressaoInaltareda = expressao;
 
         String[] split = expressao.split("");
 
-        String sentenca = "111111";
-        //String sentenca = "01101";
 
         String[] simbolos = sentenca.split("");
 
@@ -307,8 +313,8 @@ public class AutomatonController {
             System.out.println("Sentença Aceita");
         }
 
-        GeradorXMLController geradorXml = new GeradorXMLController();
-        geradorXml.geraXML(automaton, expressao);
+/*        GeradorXMLController geradorXml = new GeradorXMLController();
+        geradorXml.geraXML(automaton, expressao);*/
     }
 
 
