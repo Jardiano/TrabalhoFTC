@@ -19,10 +19,10 @@ public class AutomatonController {
     public static State raiz;
 
 
-    public static void main(String[] args) {
+/*    public static void main(String[] args) {
         AutomatonController controller = new AutomatonController();
         controller.converteExpressão();
-    }
+    }*/
 
     public void converteExpressão() {
         //String expressao = "1(0*0)+(11*)+(1)00";

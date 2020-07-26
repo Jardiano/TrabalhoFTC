@@ -74,9 +74,9 @@ public class GeradorXMLController
     }
 
 
-    public static void main(String[] args)
+    /*public static void main(String[] args)
     {
         GeradorXMLController controller = new GeradorXMLController();
         controller.geraXML(new Automaton(),"", null);
-    }
+    }*/
 }

@@ -27,7 +27,7 @@ public class AutomatonController2 {
     public static final Set<String> alfabeto = new HashSet<>();
 
 
-    public static void main(String[] args) {
+/*    public static void main(String[] args) {
         //String expressao = "1(0*0)+(11*)+(1)00";
                         String expressao = "1*011*01";
         //String expressao = "1(01)*+0(01)*";
@@ -46,7 +46,7 @@ public class AutomatonController2 {
         boolean result = controller.executaMaquinaEstados(sentenca, sentenca.split(""), automaton);
 
         System.out.println("The result is " + result);
-    }
+    }*/
 
 
     public Automaton converteExpressão(String expressao) {
