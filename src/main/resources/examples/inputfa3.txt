@@ -1,0 +1,15 @@
+0101 accept
+10001 accept
+111101 accept
+110010 accept
+1000000001 reject
+11101 accept
+1012 accept
+000000001 accept
+010101 reject
+1113223548 accept
+1111111111000000001 accept
+000001 accept
+101 accept
+1010101 accept
+0010101 reject
