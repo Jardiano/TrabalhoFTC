@@ -30,10 +30,10 @@ public class AutomatonController {
         //String expressao = "1*01+1*01";
         //String expressao = "1(01)*+0(01)*";
         //String expressao = "1*011*01";
-        String expressao = "110*";
+        String expressao = "1*00*1";
         //String expressao = "(00+01(11)*10+(1+01(11)*0)(0(11)*0)*(1+0(11)*10))*";
 
-        String sentenca = "110000";
+        String sentenca = "11111111110000000011111111111000000001";
 
         final String expressaoInaltareda = expressao;
 

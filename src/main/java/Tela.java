@@ -131,7 +131,7 @@ public class Tela extends javax.swing.JFrame {
                     Files.readAllLines(arquivoSentencas.toPath()).forEach(linha ->{
                         String[] split = linha.split(" ");
                         String sentenca =  split[0];
-                        String estado ;
+                        String estado = "";
 
                         if(split.length > 1){
                             estado = split[1];

@@ -29,13 +29,13 @@ public class AutomatonController2 {
 
     public static void main(String[] args) {
         //String expressao = "1(0*0)+(11*)+(1)00";
-                        //String expressao = "1*011*01";
+                        String expressao = "1*011*01";
         //String expressao = "1(01)*+0(01)*";
         //String expressao = "1*01+1*01";
                     //String expressao = "1*01+1*01+1*(01)";
         //String expressao = "1(01)*+0(01)*";
         //String expressao = "1*10(01)*";
-        String expressao = "1*00*1";
+                    //String expressao = "1*00*1";
         //String expressao = "0*11*";
         //String expressao = "(00+01(11)*10+(1+01(11)*0)(0(11)*0)*(1+0(11)*10))*";
 
@@ -408,10 +408,21 @@ public class AutomatonController2 {
         geradorXml.geraXML(automaton, "expressao", null);*/
 
         State currentState = null;
+        boolean hasTransitionsFinalState = false;
         for (int i = 0; i < sentenca.length(); i++) {
             if(!alfabeto.contains(simbolos[i])){
-                lastState.setFinalState(false);
+                hasTransitionsFinalState = true;
                 break;
+            }else if(lastState.isFinalState()){
+                List<Transition> transitionsFromFinalState = automaton.getTransitionsFromStateId(lastState.getId());
+                int index = i;
+                boolean hasTransitionWithValue = transitionsFromFinalState.stream().anyMatch(transition -> transition.getRead().equals(simbolos[index]));
+
+                if(transitionsFromFinalState.isEmpty() || !hasTransitionWithValue){
+                    hasTransitionsFinalState = true;
+                    break;
+                }
+
             }
 
             if (isSimbolAccepted) {
@@ -439,7 +450,7 @@ public class AutomatonController2 {
         }
         //}
 
-        if (lastState.isFinalState()) {
+        if (lastState.isFinalState() && !hasTransitionsFinalState) {
             System.out.println("Sentença Aceita");
             return true;
         }
